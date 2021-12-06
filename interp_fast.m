@@ -17,7 +17,7 @@ function [y_vec_pts, idx] = get_interp_fast(x_vec, y_mat, x_pts, idx_init)
 %    Linear interpolation inside the domain, linear extrapolation outside.
 %
 %    The following fast interpolation method is implemented:
-%        - After each query, the position (index) of the points is returned.
+%        - After each query, the position (index) of the point is returned.
 %        - This index is used as an initial value for the next query point. 
 %
 %    This method reduces the computational cost if the query points are partially sorted.

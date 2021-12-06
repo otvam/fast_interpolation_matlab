@@ -1,12 +1,12 @@
-function run_test_interp()
+function run_benchmark_run()
 % Compare the computational cost of different linear interpolation methods.
 %
 %    The follwing methods are compard:
 %        - 'interp1', evaluate all the query points at once
-%        - 'interp1', evaluate the query points one by one in a loop
+%        - 'interp1', evaluate the query points one by one (in a for-loop)
 %        - 'griddedInterpolant', evaluate all the query points at once
-%        - 'griddedInterpolant', evaluate the query points one by one in a loop
-%        - faster interpolation method, evaluate the query points one by one in a loop
+%        - 'griddedInterpolant', evaluate the query points one by one (in a for-loop)
+%        - 'interp_fast', evaluate the query points one by one (in a for-loop)
 %
 %    The interpolation methods are tested with two different situations:
 %        - many query points, the points are mostly sorted
@@ -17,8 +17,8 @@ function run_test_interp()
 %    Thomas Guillod.
 %    2021 - BSD License.
 
-addpath(genpath('example'))
-addpath(genpath('mex'))
+addpath(genpath('benchmark_matlab'))
+addpath(genpath('benchmark_mex'))
 
 %% interpolation data
 
@@ -30,7 +30,7 @@ y_mat = [-1+x_vec+x_vec.^2 ; +1+x_vec-x_vec.^2; +2-x_vec-x_vec.^2];
 
 %% query points
 
-% inital query point, mostly sorted
+% query point, mostly sorted
 x_vec_pts_sort = [...
     linspace(-1.0, +2.0, 2500)...
     linspace(+2.0, -0.5, 2500)...
@@ -46,22 +46,22 @@ x_vec_pts_rand = x_vec_pts_sort(idx);
 %% evaluate the interpolation
 
 % number of repetition to obtain reproducable timing
-n_rep = 10;
+n_rep = 25;
 
 % 'interp1', evaluate all the query points at once
 interp1_vec = get_run(@get_test_interp1_vec, @get_test_interp1_vec_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
-% 'interp1', evaluate the query points one by one in a loop
+% 'interp1', evaluate the query points one by one (in a for-loop)
 interp1_loop = get_run(@get_test_interp1_loop, @get_test_interp1_loop_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
 % 'griddedInterpolant', evaluate all the query points at once
 griddedInterpolant_vec = get_run(@get_test_griddedInterpolant_vec, [], x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
-% 'griddedInterpolant', evaluate the query points one by one in a loop
+% 'griddedInterpolant', evaluate the query points one by one (in a for-loop)
 griddedInterpolant_loop = get_run(@get_test_griddedInterpolant_loop, [], x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
-% faster interpolation method, evaluate the query points one by one in a loop
-fast = get_run(@get_test_fast, @get_test_fast_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
+% faster interpolation method, evaluate the query points one by one (in a for-loop)
+interp_fast = get_run(@get_test_interp_fast, @get_test_interp_fast_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
 %% display
 
@@ -70,13 +70,13 @@ get_disp_timing('interp1_vec', interp1_vec);
 get_disp_timing('interp1_loop', interp1_loop);
 get_disp_timing('griddedInterpolant_vec', griddedInterpolant_vec);
 get_disp_timing('griddedInterpolant_loop', griddedInterpolant_loop);
-get_disp_timing('fast', fast);
+get_disp_timing('interp_fast', interp_fast);
 
 % display the error for the different methods 
-get_disp_error('interp1_vec vs. fast', interp1_vec, fast);
-get_disp_error('interp1_loop vs. fast', interp1_loop, fast);
-get_disp_error('griddedInterpolant_vec vs. fast', griddedInterpolant_vec, fast);
-get_disp_error('griddedInterpolant_loop vs. fast', griddedInterpolant_loop, fast);
+get_disp_error('interp1_vec vs. interp_fast', interp1_vec, interp_fast);
+get_disp_error('interp1_loop vs. interp_fast', interp1_loop, interp_fast);
+get_disp_error('griddedInterpolant_vec vs. interp_fast', griddedInterpolant_vec, interp_fast);
+get_disp_error('griddedInterpolant_loop vs. interp_fast', griddedInterpolant_loop, interp_fast);
 
 end
 

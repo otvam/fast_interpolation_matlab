@@ -1,5 +1,5 @@
 function y_mat_pts = get_test_interp1_loop(x_vec, y_mat, x_vec_pts)
-% Linear interpolation using 'interp1' (evaluate the query points one by one in a loop).
+% Linear interpolation using 'interp1' (evaluate the query points one by one (in a for-loop)).
 %
 %    Parameters:
 %        x_vec - vector with the sample points (float / row vector)
@@ -14,7 +14,7 @@ function y_mat_pts = get_test_interp1_loop(x_vec, y_mat, x_vec_pts)
 %
 %    Linear interpolation inside the domain, linear extrapolation outside.
 %
-%    Evaluating the query points one by one in a loop is suboptimal and slow.
+%    Evaluating the query points one by one (in a for-loop) is suboptimal and slow.
 %    This should only be done is required (interdependency between the query points).
 %
 %    Thomas Guillod.
