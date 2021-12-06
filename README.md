@@ -28,7 +28,7 @@ This function can be compiled to a **MEX** file with the **MATLAB Coder**.
 ## Examples
 
 * [interp_fast.m](interp_fast.m) - Implementation of the fast interpolation method.
-* [run_simple_example.m](run_simple_example.m) - Minimal working example for the interpolation code.
+* [run_example_simple.m](run_example_simple.m) - Minimal working example for the interpolation code.
 * [run_example_ode.m](run_example_ode.m) - Example with interpolation inside an ODE function.
 
 ## Benchmark
@@ -73,20 +73,20 @@ The following files are required to run the benchmark:
 
 All the 12500 query points are evaluated at once with a vectorized call.
 
-| Method               | Type   | Order  | Time    |
-| -------------------- |--------| -------|---------| 
-| `interp1`            | MATLAB | Sorted | 0.75ms  |
-| `interp1`            | MATLAB | Random | 0.65ms  |
-| `interp1`            | MEX    | Sorted | 0.61ms  |
-| `interp1`            | MEX    | Random | 0.82ms  |
-| -------------------- |--------| -------|---------| 
-| `griddedInterpolant` | MATLAB | Sorted | 0.16ms  |
-| `griddedInterpolant` | MATLAB | Random | 0.21ms  |
-| -------------------- |--------| -------|---------| 
-| `interp_fast`        | MATLAB | Sorted | 6.87ms  |
-| `interp_fast`        | MATLAB | Random | 21.74ms |
-| `interp_fast`        | MEX    | Sorted | 1.03ms  |
-| `interp_fast`        | MEX    | Random | 12.94ms |
+| Method               | Type   | Order  | Time        |
+| -------------------- |--------| -------|-------------| 
+| `interp1`            | MATLAB | Sorted | 0.75ms      |
+| `interp1`            | MATLAB | Random | 0.65ms      |
+| `interp1`            | MEX    | Sorted | 0.61ms      |
+| `interp1`            | MEX    | Random | 0.82ms      |
+|                      |        |                      | 
+| `griddedInterpolant` | MATLAB | Sorted | **0.16ms**  |
+| `griddedInterpolant` | MATLAB | Random | **0.21ms**  |
+|                      |        |                      | 
+| `interp_fast`        | MATLAB | Sorted | 6.87ms      |
+| `interp_fast`        | MATLAB | Random | 21.74ms     |
+| `interp_fast`        | MEX    | Sorted | 1.03ms      |
+| `interp_fast`        | MEX    | Random | 12.94ms     |
 
 For vectorized call, the following conclusions are drawn:
 * MEX files are not faster than MATLAB files for `interp1`.
@@ -100,20 +100,20 @@ For vectorized call, the following conclusions are drawn:
 
 All the 12500 query points are evaluated one by one (in a for-loop).
 
-| Method               | Type   | Order  | Time     |
-| -------------------- |--------| -------|----------| 
-| `interp1`            | MATLAB | Sorted | 483.33ms |
-| `interp1`            | MATLAB | Random | 531.44ms |
-| `interp1`            | MEX    | Sorted | 70.01ms  |
-| `interp1`            | MEX    | Random | 69.60ms  |
-| -------------------- |--------| -------|----------| 
-| `griddedInterpolant` | MATLAB | Sorted | 34.31ms  |
-| `griddedInterpolant` | MATLAB | Random | 34.56ms  |
-| -------------------- |--------| -------|----------| 
-| `interp_fast`        | MATLAB | Sorted | 6.87ms   |
-| `interp_fast`        | MATLAB | Random | 21.74ms  |
-| `interp_fast`        | MEX    | Sorted | 1.03ms   |
-| `interp_fast`        | MEX    | Random | 12.94ms  |
+| Method               | Type   | Order  | Time        |
+| -------------------- |--------| -------|-------------| 
+| `interp1`            | MATLAB | Sorted | 483.33ms    |
+| `interp1`            | MATLAB | Random | 531.44ms    |
+| `interp1`            | MEX    | Sorted | 70.01ms     |
+| `interp1`            | MEX    | Random | 69.60ms     |
+|                      |        |                      | 
+| `griddedInterpolant` | MATLAB | Sorted | 34.31ms     |
+| `griddedInterpolant` | MATLAB | Random | 34.56ms     |
+|                      |        |                      |
+| `interp_fast`        | MATLAB | Sorted | 6.87ms      |
+| `interp_fast`        | MATLAB | Random | 21.74ms     |
+| `interp_fast`        | MEX    | Sorted | **1.03ms**  |
+| `interp_fast`        | MEX    | Random | **12.94ms** |
 
 For vectorized call, the following conclusions are drawn:
 * MEX files are faster than MATLAB files for `interp1`.
@@ -122,12 +122,11 @@ For vectorized call, the following conclusions are drawn:
 * The best overall algorithm is `interp_fast`.
 
 **For non-vectorized call, `interp_fast` should be prefered.**
-**The proposed algorithm is up to 30x faster than the MATLAB builtin interpolation methods.**
 
 ## Compatibility
 
 * Tested with MATLAB R2021a.
-* No toolboxes are required.
+* The MATLAB Coder toolbox is required for compiling MATLAB into MEX.
 * Compatibility with GNU Octave not tested but probably easy to achieve.
 
 ## Author
