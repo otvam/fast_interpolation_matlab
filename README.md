@@ -103,8 +103,7 @@ interp_fast          MEX      sorted = 1.12 ms     random = 18.45 ms
 ============================ vectorized call
 ```
 
-* MEX files are not faster than MATLAB files for `interp1`.
-* MEX files are faster than MATLAB files for `interp_regular` and `interp_fast`.
+* MEX files are not faster than MATLAB files.
 * Sorted query points are better for `interp_fast`.
 * The best overall algorithm is `griddedInterpolant`.
 * **For vectorized call, `griddedInterpolant` should be prefered.**
@@ -131,7 +130,7 @@ interp_fast          MEX      sorted = 1.11 ms     random = 17.61 ms
 ============================ non-vectorized call
 ```
 
-* MEX files are faster than MATLAB files for `interp1`, `interp_regular`, and `interp_fast`.
+* MEX files are faster than MATLAB files.
 * Sorted query points are better for `interp_fast`.
 * The best overall algorithm is `interp_regular` and `interp_fast`.
 * **For non-vectorized call, `interp_regular` should be prefered with evenly spaced samples points.**
