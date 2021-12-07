@@ -1,17 +1,17 @@
-function [y_vec_pts, idx] = interp_fast(x_vec, y_mat, x_pts, idx_init)
+function [y_mat_pts, idx] = interp_fast(x_vec, y_mat, x_vec_pts, idx)
 % Extremely fast linear interpolation method.
 %
 %    Parameters:
 %        x_vec - vector with the sample points (float / row vector)
 %        y_mat - matrix with the sample values (float / matrix)
-%        x_pts - scalar with the query point (float / scalar)
-%        idx_init - initial value for the location of the query point (integer / scalar)
+%        x_vec_pts - vector with the query points (float / row vector)
+%        idx - initial value for the location of the query point (integer / scalar)
 %
 %    Returns:
-%        y_vec_pts - interpolated values (float / col vector)
-%        idx - location of the query point (integer / scalar)
+%        y_mat_pts - interpolated values (float / matrix)
+%        idx - location of the last query point (integer / scalar)
 %
-%    Row vector are considered for both the samples and query points.
+%    Row vector are considered for the samples.
 %    If the sample values is a matrix, then each row contains a set of 1D values.
 %
 %    Linear interpolation inside the domain, linear extrapolation outside.
@@ -30,16 +30,17 @@ function [y_vec_pts, idx] = interp_fast(x_vec, y_mat, x_pts, idx_init)
 %    Thomas Guillod.
 %    2021 - BSD License.
 
-% if no index is provided, search for one
-if isnan(idx_init)
-    idx_init = get_interp_init(x_vec, x_pts);
+% init solution
+y_mat_pts = zeros(size(y_mat, 1), size(x_vec_pts, 2));
+
+% interpolate for each point
+for i=1:length(x_vec_pts)
+    % update the index with respect to the provided query points
+    idx = get_interp_idx(x_vec, x_vec_pts(i), idx);
+    
+    % linear interpolation
+    y_mat_pts(:,i) = get_interp_lin(x_vec, y_mat, x_vec_pts(i), idx);
 end
-
-% update the index with respect to the provided query points
-idx = get_interp_idx(x_vec, x_pts, idx_init);
-
-% linear interpolation
-y_vec_pts = get_interp_lin(x_vec, y_mat, x_pts, idx);
 
 end
 
@@ -75,6 +76,11 @@ function idx = get_interp_idx(x_vec, x_pts, idx_init)
 %
 %    Returns:
 %        idx - location of the query point (integer / scalar)
+
+% if no intial guess, find one
+if isnan(idx_init)
+    idx_init = get_interp_init(x_vec, x_pts);
+end
 
 % default case, initial guess is correct
 idx = idx_init;
