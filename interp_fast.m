@@ -34,12 +34,20 @@ function [y_mat_pts, idx] = interp_fast(x_vec, y_mat, x_vec_pts, idx)
 y_mat_pts = zeros(size(y_mat, 1), size(x_vec_pts, 2));
 
 % interpolate for each point
-for i=1:length(x_vec_pts)
+if isscalar(x_vec_pts)
     % update the index with respect to the provided query points
-    idx = get_interp_idx(x_vec, x_vec_pts(i), idx);
+    idx = get_interp_idx(x_vec, x_vec_pts, idx);
     
     % linear interpolation
-    y_mat_pts(:,i) = get_interp_lin(x_vec, y_mat, x_vec_pts(i), idx);
+    y_mat_pts = get_interp_lin(x_vec, y_mat, x_vec_pts, idx);
+else
+    for i=1:length(x_vec_pts)
+        % update the index with respect to the provided query points
+        idx = get_interp_idx(x_vec, x_vec_pts(i), idx);
+        
+        % linear interpolation
+        y_mat_pts(:,i) = get_interp_lin(x_vec, y_mat, x_vec_pts(i), idx);
+    end
 end
 
 end

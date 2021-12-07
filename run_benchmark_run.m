@@ -6,6 +6,8 @@ function run_benchmark_run()
 %        - 'interp1', evaluate the query points one by one (in a for-loop)
 %        - 'griddedInterpolant', evaluate all the query points at once
 %        - 'griddedInterpolant', evaluate the query points one by one (in a for-loop)
+%        - 'interp_regular', evaluate all the query points at once
+%        - 'interp_regular', evaluate the query points one by one (in a for-loop)
 %        - 'interp_fast', evaluate the query points one by one (in a for-loop)
 %
 %    The interpolation methods are tested with two different situations:
@@ -22,7 +24,7 @@ addpath(genpath('benchmark_mex'))
 
 %% interpolation data
 
-% sample points (sorted)
+% sample points (sorted and evenly spaced)
 x_vec = linspace(0, 1, 1000);
 
 % sample values (3 rows)
@@ -48,39 +50,63 @@ x_vec_pts_rand = x_vec_pts_sort(idx);
 % number of repetition to obtain reproducable timing
 n_rep = 25;
 
-% 'interp1', evaluate all the query points at once
-interp1_vec = get_run(@get_test_interp1_vec, @get_test_interp1_vec_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
+% interp1
+fct.vec_mat = @get_test_interp1_vec;
+fct.vec_mex = @get_test_interp1_vec_mex;
+fct.loop_mat = @get_test_interp1_loop;
+fct.loop_mex = @get_test_interp1_loop_mex;
+res_interp1 = get_run(fct, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
-% 'interp1', evaluate the query points one by one (in a for-loop)
-interp1_loop = get_run(@get_test_interp1_loop, @get_test_interp1_loop_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
+% griddedInterpolant
+fct.vec_mat = @get_test_griddedInterpolant_vec;
+fct.vec_mex = [];
+fct.loop_mat = @get_test_griddedInterpolant_loop;
+fct.loop_mex = [];
+res_griddedInterpolant = get_run(fct, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
-% 'griddedInterpolant', evaluate all the query points at once
-griddedInterpolant_vec = get_run(@get_test_griddedInterpolant_vec, [], x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
+% interp_regular
+fct.vec_mat = @get_test_interp_regular_vec;
+fct.vec_mex = @get_test_interp_regular_vec_mex;
+fct.loop_mat = @get_test_interp_regular_loop;
+fct.loop_mex = @get_test_interp_regular_loop_mex;
+res_interp_regular = get_run(fct, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
-% 'griddedInterpolant', evaluate the query points one by one (in a for-loop)
-griddedInterpolant_loop = get_run(@get_test_griddedInterpolant_loop, [], x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
-
-% faster interpolation method, evaluate the query points one by one (in a for-loop)
-interp_fast = get_run(@get_test_interp_fast, @get_test_interp_fast_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
+% interp_fast_loop
+fct.vec_mat = @get_test_interp_fast_vec;
+fct.vec_mex = @get_test_interp_fast_vec_mex;
+fct.loop_mat = @get_test_interp_fast_loop;
+fct.loop_mex = @get_test_interp_fast_loop_mex;
+res_interp_fast = get_run(fct, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep);
 
 %% display
 
-% display the timing for the different methods
-get_disp_timing('interp1_vec', interp1_vec);
-get_disp_timing('interp1_loop', interp1_loop);
-get_disp_timing('griddedInterpolant_vec', griddedInterpolant_vec);
-get_disp_timing('griddedInterpolant_loop', griddedInterpolant_loop);
-get_disp_timing('interp_fast', interp_fast);
+fprintf('============================ vectorized call\n')
+fprintf('\n')
+get_disp_timing('vec', 'interp1', res_interp1);
+fprintf('\n')
+get_disp_timing('vec', 'griddedInterpolant', res_griddedInterpolant);
+fprintf('\n')
+get_disp_timing('vec', 'interp_regular', res_interp_regular);
+fprintf('\n')
+get_disp_timing('vec', 'interp_fast', res_interp_fast);
+fprintf('\n')
+fprintf('============================ vectorized call\n')
 
-% display the error for the different methods 
-get_disp_error('interp1_vec vs. interp_fast', interp1_vec, interp_fast);
-get_disp_error('interp1_loop vs. interp_fast', interp1_loop, interp_fast);
-get_disp_error('griddedInterpolant_vec vs. interp_fast', griddedInterpolant_vec, interp_fast);
-get_disp_error('griddedInterpolant_loop vs. interp_fast', griddedInterpolant_loop, interp_fast);
+fprintf('============================ non-vectorized call\n')
+fprintf('\n')
+get_disp_timing('loop', 'interp1', res_interp1);
+fprintf('\n')
+get_disp_timing('loop', 'griddedInterpolant', res_griddedInterpolant);
+fprintf('\n')
+get_disp_timing('loop', 'interp_regular', res_interp_regular);
+fprintf('\n')
+get_disp_timing('loop', 'interp_fast', res_interp_fast);
+fprintf('\n')
+fprintf('============================ non-vectorized call\n')
 
 end
 
-function res = get_run(fct_mat, fct_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep)
+function res = get_run(fct, x_vec, y_mat, x_vec_pts_sort, x_vec_pts_rand, n_rep)
 % Run and time an interpolation method.
 %
 %    Parameters:
@@ -95,25 +121,21 @@ function res = get_run(fct_mat, fct_mex, x_vec, y_mat, x_vec_pts_sort, x_vec_pts
 %    Returns:
 %        timing - interpolated values and timing information (struct)
 
-% test different combinations (MATLAB, MEX, query point order)
-[t_mat_sort, y_mat_pts_mat_sort] = get_time(fct_mat, x_vec, y_mat, x_vec_pts_sort, n_rep);
-[t_mat_rand, y_mat_pts_mat_rand] = get_time(fct_mat, x_vec, y_mat, x_vec_pts_rand, n_rep);
-[t_mex_sort, y_mat_pts_mex_sort] = get_time(fct_mex, x_vec, y_mat, x_vec_pts_sort, n_rep);
-[t_mex_rand, y_mat_pts_mex_rand] = get_time(fct_mex, x_vec, y_mat, x_vec_pts_rand, n_rep);
+% test different combinations (all the query points at once)
+res.t_vec_mat_sort = get_time(fct.vec_mat, x_vec, y_mat, x_vec_pts_sort, n_rep);
+res.t_vec_mat_rand = get_time(fct.vec_mat, x_vec, y_mat, x_vec_pts_rand, n_rep);
+res.t_vec_mex_sort = get_time(fct.vec_mex, x_vec, y_mat, x_vec_pts_sort, n_rep);
+res.t_vec_mex_rand = get_time(fct.vec_mex, x_vec, y_mat, x_vec_pts_rand, n_rep);
 
-% assign results
-res.t_mat_sort = t_mat_sort;
-res.t_mat_rand = t_mat_rand;
-res.t_mex_sort = t_mex_sort;
-res.t_mex_rand = t_mex_rand;
-res.y_mat_pts_mat_sort = y_mat_pts_mat_sort;
-res.y_mat_pts_mat_rand = y_mat_pts_mat_rand;
-res.y_mat_pts_mex_sort = y_mat_pts_mex_sort;
-res.y_mat_pts_mex_rand = y_mat_pts_mex_rand;
+% test different combinations (loop over the query points)
+res.t_loop_mat_sort = get_time(fct.loop_mat, x_vec, y_mat, x_vec_pts_sort, n_rep);
+res.t_loop_mat_rand = get_time(fct.loop_mat, x_vec, y_mat, x_vec_pts_rand, n_rep);
+res.t_loop_mex_sort = get_time(fct.loop_mex, x_vec, y_mat, x_vec_pts_sort, n_rep);
+res.t_loop_mex_rand = get_time(fct.loop_mex, x_vec, y_mat, x_vec_pts_rand, n_rep);
 
 end
 
-function [t, y_mat_pts] = get_time(fct, x_vec, y_mat, x_vec_pts, n_rep)
+function t = get_time(fct, x_vec, y_mat, x_vec_pts, n_rep)
 % Run and time an interpolation method.
 %
 %    Parameters:
@@ -124,52 +146,51 @@ function [t, y_mat_pts] = get_time(fct, x_vec, y_mat, x_vec_pts, n_rep)
 %        n_rep - number of repetition to obtain reproducable timing (integer)
 %
 %    Returns:
-%        res - interpolated values and timing information (struct)
+%        t - mean run time (float)
 
 if isempty(fct)
     t = NaN;
-    y_mat_pts = NaN(size(y_mat, 1), size(x_vec_pts, 2));
 else
     t = tic();
     for i=1:n_rep
         y_mat_pts  = fct(x_vec, y_mat, x_vec_pts);
     end
     t = toc(t)./n_rep;
+    assert(isnumeric(y_mat_pts), 'invalid data')
 end
 
 end
 
-function get_disp_error(name, res_1, res_2)
-% Display the error between two interpolation method.
-%
-%    Parameters:
-%        name - name of the interpolation method (string)
-%        res_1 - interpolated values and timing information (struct)
-%        res_2 - interpolated values and timing information (struct)
-
-res_2_vec = [res_2.y_mat_pts_mat_sort res_2.y_mat_pts_mat_rand res_2.y_mat_pts_mex_sort res_2.y_mat_pts_mex_rand];
-res_1_vec = [res_1.y_mat_pts_mat_sort res_1.y_mat_pts_mat_rand res_1.y_mat_pts_mex_sort res_1.y_mat_pts_mex_rand];
-err_vec = max(abs(res_2_vec-res_1_vec), [], 2);
-
-fprintf('============================ %s\n', name)
-fprintf('\n')
-fprintf('error / max = %e\n', max(err_vec))
-fprintf('error / mean = %e\n', mean(err_vec))
-fprintf('\n')
-
-end
-
-function get_disp_timing(name, res)
+function get_disp_timing(type, name, res)
 % Display the timing information for an interpolation method.
 %
 %    Parameters:
+%        type - type of data to display (string)
 %        name - name of the interpolation method (string)
 %        res - interpolated values and timing information (struct)
 
-fprintf('============================ %s\n', name)
-fprintf('\n')
-fprintf('timing / mat / sort = %.2f ms / rand = %.2f ms\n', 1e3.*res.t_mat_sort, 1e3.*res.t_mat_rand)
-fprintf('timing / mex / sort = %.2f ms / rand = %.2f ms\n', 1e3.*res.t_mex_sort, 1e3.*res.t_mex_rand)
-fprintf('\n')
+switch type
+    case 'vec'
+        t_mat_sort = res.t_vec_mat_sort;
+        t_mat_rand = res.t_vec_mat_rand;
+        t_mex_sort = res.t_vec_mex_sort;
+        t_mex_rand = res.t_vec_mex_rand;
+    case 'loop'
+        t_mat_sort = res.t_loop_mat_sort;
+        t_mat_rand = res.t_loop_mat_rand;
+        t_mex_sort = res.t_loop_mex_sort;
+        t_mex_rand = res.t_loop_mex_rand;
+    otherwise
+        error('invalid data')
+end
+
+name = pad(name, 18);
+t_mat_sort = pad(sprintf('%.2f ms', 1e3.*t_mat_sort), 9);
+t_mat_rand = pad(sprintf('%.2f ms', 1e3.*t_mat_rand), 9);
+t_mex_sort = pad(sprintf('%.2f ms', 1e3.*t_mex_sort), 9);
+t_mex_rand = pad(sprintf('%.2f ms', 1e3.*t_mex_rand), 9);
+
+fprintf('%s   MATLAB   sorted = %s   random = %s\n', name, t_mat_sort, t_mat_rand)
+fprintf('%s   MEX      sorted = %s   random = %s\n', name,t_mex_sort, t_mex_rand)
 
 end

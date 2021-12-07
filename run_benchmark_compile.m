@@ -14,15 +14,21 @@ x_vec = coder.typeof(double(0), [1 Inf]);
 y_mat = coder.typeof(double(0), [Inf Inf]);
 x_vec_pts = coder.typeof(double(0), [1 Inf]);
 
-% call the MEX compiler
-codegen get_test_interp1_loop.m -args {x_vec, y_mat, x_vec_pts} -report -v	
-codegen get_test_interp1_vec.m -args {x_vec, y_mat, x_vec_pts} -report -v	
-codegen get_test_interp_fast.m -args {x_vec, y_mat, x_vec_pts} -report -v	
+% file to be compiled
+name = {...
+    'get_test_interp1_loop',...
+    'get_test_interp1_vec',...
+    'get_test_interp_regular_loop',...
+    'get_test_interp_regular_vec',...
+    'get_test_interp_fast_loop',...
+    'get_test_interp_fast_vec',...
+    };
 
-% move the created files to the mex folder
+% call the MEX compiler
 [s, d] = mkdir('benchmark_mex');
-movefile('get_test_interp1_loop_mex.mexa64', 'benchmark_mex')
-movefile('get_test_interp1_vec_mex.mexa64', 'benchmark_mex')
-movefile('get_test_interp_fast_mex.mexa64', 'benchmark_mex')
+for i=1:length(name)
+    codegen([name{i} '.m'], '-args', '{x_vec, y_mat, x_vec_pts}', '-report', '-v')	
+    movefile([name{i} '_mex.mexa64'], 'benchmark_mex')
+end
 
 end

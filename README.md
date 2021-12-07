@@ -5,20 +5,29 @@
 ![category - science](https://img.shields.io/badge/category-science-lightgrey)
 ![status - maintained](https://img.shields.io/badge/status-maintained-green)
 
-The **MATLAB code** offers a fast **1D linear interpolation** method.
+The **MATLAB code** offers fast **1D linear interpolation** methods.
 
-The following **fast** interpolation **method** is implemented:
+The following **fast interpolation methods** is implemented:
 * Linear interpolation inside the domain, linear extrapolation outside.
 * Support vector or matrix (set of 1D values) for the sample values.
-* This algorithm can be **up to 30x faster** than the MATLAB builtin interpolation methods.
+* Support for evenly spaced sample points: `interp_regular`.
+* Support for evenly arbitrarily spaced sample points: `interp_fast`.
+* These algorithms can be **up to 30x faster** than the MATLAB builtin interpolation methods.
 
-The following **algorithm** is used:
+The following **algorithm** is used for `interp_regular`:
+* The sample points are evenly spaced.
+* The position (index) of the query points can be computed without searching.
+* Hence, the complexity is O(1).
+
+The following **algorithm** is used for `interp_fast`:
+* The sample points are arbitrarily spaced.
 * After each query, the position (index) of the point is returned.
 * This index is used as an initial value for the next query point.
 * Hence, the computational cost is reduced if the query points are partially sorted.
-* In such cases, the complexity is reduced from O(n) to O(1).
+* For randomly distributed query points, the complexity is O(n).
+* For sorted query points, the complexity is reduced from O(n) to O(1).
 
-This method should be **used in the following case**:
+These methods should be **used in the following case**:
 * Many calls are done with the same sample points and values.
 * The calls cannot be vectorized (interdepency between the query points).
 * A typical use case is ODE integration where the calls cannot be vectorized.
@@ -27,7 +36,8 @@ This function can be compiled to a **MEX** file with the **MATLAB Coder**.
 
 ## Examples
 
-* [interp_fast.m](interp_fast.m) - Implementation of the fast interpolation method.
+* [interp_regular.m](interp_regular.m) - Fast interpolation method (evenly spaced sample points).
+* [interp_fast.m](interp_fast.m) - Fast interpolation method (arbitrarily spaced sample points).
 * [run_example_simple.m](run_example_simple.m) - Minimal working example for the interpolation code.
 * [run_example_ode.m](run_example_ode.m) - Example with interpolation inside an ODE function.
 
@@ -59,10 +69,12 @@ x_vec_pts_sort = [...
 idx = randperm(length(x_vec_pts_sort));
 x_vec_pts_rand = x_vec_pts_sort(idx);
 ```
+
 The following algorithms are compared with sorted and random query points:
-* `interp_fast` code (the proposed method, MATLAB and MEX)
 * `interp1` code (MATLAB builtin function, MATLAB and MEX)
 * `griddedInterpolant` code (MATLAB builtin function, MATLAB)
+* `interp_regular` code (proposed method, MATLAB and MEX)
+* `interp_fast` code (proposed method, MATLAB and MEX)
 * In this document, the benchmark is run on a Intel i5-8250U laptop on Linux (64 bits).
 
 The following files are required to run the benchmark:
@@ -73,55 +85,57 @@ The following files are required to run the benchmark:
 
 All the 12500 query points are evaluated at once with a vectorized call.
 
-| Method               | Type   | Order  | Time        |
-| -------------------- |--------| -------|-------------| 
-| `interp1`            | MATLAB | Sorted | 0.75ms      |
-| `interp1`            | MATLAB | Random | 0.65ms      |
-| `interp1`            | MEX    | Sorted | 0.61ms      |
-| `interp1`            | MEX    | Random | 0.82ms      |
-|                      |        |                      | 
-| `griddedInterpolant` | MATLAB | Sorted | **0.16ms**  |
-| `griddedInterpolant` | MATLAB | Random | **0.21ms**  |
-|                      |        |                      | 
-| `interp_fast`        | MATLAB | Sorted | 6.87ms      |
-| `interp_fast`        | MATLAB | Random | 21.74ms     |
-| `interp_fast`        | MEX    | Sorted | 1.03ms      |
-| `interp_fast`        | MEX    | Random | 12.94ms     |
+```
+============================ vectorized call
 
-For vectorized call, the following conclusions are drawn:
+interp1              MATLAB   sorted = 0.74 ms     random = 0.70 ms  
+interp1              MEX      sorted = 0.70 ms     random = 0.85 ms  
+
+griddedInterpolant   MATLAB   sorted = 0.18 ms     random = 0.21 ms  
+griddedInterpolant   MEX      sorted = NaN ms      random = NaN ms   
+
+interp_regular       MATLAB   sorted = 1.92 ms     random = 1.59 ms  
+interp_regular       MEX      sorted = 2.89 ms     random = 4.18 ms  
+
+interp_fast          MATLAB   sorted = 3.62 ms     random = 18.61 ms 
+interp_fast          MEX      sorted = 1.12 ms     random = 18.45 ms 
+
+============================ vectorized call
+```
+
 * MEX files are not faster than MATLAB files for `interp1`.
-* MEX files are faster than MATLAB files for `interp_fast`.
+* MEX files are faster than MATLAB files for `interp_regular` and `interp_fast`.
 * Sorted query points are better for `interp_fast`.
 * The best overall algorithm is `griddedInterpolant`.
-
-**For vectorized call, `griddedInterpolant` should be prefered.**
+* **For vectorized call, `griddedInterpolant` should be prefered.**
 
 ### Non-Vectorized Call
 
 All the 12500 query points are evaluated one by one (in a for-loop).
 
-| Method               | Type   | Order  | Time        |
-| -------------------- |--------| -------|-------------| 
-| `interp1`            | MATLAB | Sorted | 483.33ms    |
-| `interp1`            | MATLAB | Random | 531.44ms    |
-| `interp1`            | MEX    | Sorted | 70.01ms     |
-| `interp1`            | MEX    | Random | 69.60ms     |
-|                      |        |                      | 
-| `griddedInterpolant` | MATLAB | Sorted | 34.31ms     |
-| `griddedInterpolant` | MATLAB | Random | 34.56ms     |
-|                      |        |                      |
-| `interp_fast`        | MATLAB | Sorted | 6.87ms      |
-| `interp_fast`        | MATLAB | Random | 21.74ms     |
-| `interp_fast`        | MEX    | Sorted | **1.03ms**  |
-| `interp_fast`        | MEX    | Random | **12.94ms** |
+```
+============================ non-vectorized call
 
-For vectorized call, the following conclusions are drawn:
-* MEX files are faster than MATLAB files for `interp1`.
-* MEX files are faster than MATLAB files for `interp_fast`.
+interp1              MATLAB   sorted = 534.80 ms   random = 649.80 ms
+interp1              MEX      sorted = 94.57 ms    random = 75.42 ms 
+
+griddedInterpolant   MATLAB   sorted = 37.21 ms    random = 45.32 ms 
+griddedInterpolant   MEX      sorted = NaN ms      random = NaN ms   
+
+interp_regular       MATLAB   sorted = 45.32 ms    random = 29.57 ms 
+interp_regular       MEX      sorted = 1.16 ms     random = 1.11 ms  
+
+interp_fast          MATLAB   sorted = 11.36 ms    random = 27.46 ms 
+interp_fast          MEX      sorted = 1.11 ms     random = 17.61 ms 
+
+============================ non-vectorized call
+```
+
+* MEX files are faster than MATLAB files for `interp1`, `interp_regular`, and `interp_fast`.
 * Sorted query points are better for `interp_fast`.
-* The best overall algorithm is `interp_fast`.
-
-**For non-vectorized call, `interp_fast` should be prefered.**
+* The best overall algorithm is `interp_regular` and `interp_fast`.
+* **For non-vectorized call, `interp_regular` should be prefered with evenly spaced samples points.**
+* **For non-vectorized call, `interp_fast` should be prefered with arbitrarily spaced samples points.**
 
 ## Compatibility
 

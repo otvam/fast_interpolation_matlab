@@ -17,16 +17,16 @@ x_vec_pts = linspace(-2, 8, 100);
 
 %% run
 
-% persistent variable tracking the index of the last query point
-persistent idx;
+% get evenly spaced points
+x_min = min(x_vec);
+x_max = max(x_vec);
 
 % initialize to an unknow index
 idx = NaN;
 
 % call the interpolant
-for i=1:length(x_vec_pts)
-    [y_mat_pts(:,i), idx] = interp_fast(x_vec, y_mat, x_vec_pts(i), idx);
-end
+y_mat_pts_regular = interp_regular(x_min, x_max, y_mat, x_vec_pts);
+y_mat_pts_fast = interp_fast(x_vec, y_mat, x_vec_pts, idx);
 
 %% plot
 
@@ -36,7 +36,8 @@ hold('on')
 grid('on')
 
 % plot interpolated data
-plot(x_vec_pts.', y_mat_pts.', '-')
+plot(x_vec_pts.', y_mat_pts_fast.', '-')
+plot(x_vec_pts.', y_mat_pts_regular.', '--')
 
 % plot samples
 plot(x_vec.', y_mat.', 'o')

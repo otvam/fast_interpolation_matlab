@@ -1,5 +1,5 @@
-function y_mat_pts = get_test_interp_fast(x_vec, y_mat, x_vec_pts)
-% Linear interpolation using a fast method (evaluate the query points one by one (in a for-loop)).
+function y_mat_pts = get_test_interp_fast_loop(x_vec, y_mat, x_vec_pts)
+% Linear interpolation using 'interp_fast' (evaluate the query points one by one (in a for-loop)).
 %
 %    Parameters:
 %        x_vec - vector with the sample points (float / row vector)
@@ -9,13 +9,8 @@ function y_mat_pts = get_test_interp_fast(x_vec, y_mat, x_vec_pts)
 %    Returns:
 %        y_mat_pts - interpolated values (float / matrix)
 %
-%    Row vector are considered for both the samples and query points.
-%    If the sample values is a matrix, then each row contains a set of 1D values.
-%
-%    Linear interpolation inside the domain, linear extrapolation outside.
-%
 %    Evaluating the query points one by one (in a for-loop) is suboptimal and slow.
-%    This should only be done is required (interdependency between the query points).
+%    This should only be done if required (interdependency between the query points).
 %
 %    Thomas Guillod.
 %    2021 - BSD License.
@@ -23,16 +18,13 @@ function y_mat_pts = get_test_interp_fast(x_vec, y_mat, x_vec_pts)
 % check format
 get_test_check(x_vec, y_mat, x_vec_pts);
 
-% persistent variable tracking the index of the last query point
-persistent idx;
-
 % initialize to an unknow index
 idx = NaN;
 
 % init the solution vector
 y_mat_pts = zeros(size(y_mat, 1), size(x_vec_pts, 2));
 
-% use a fast interpolation method with a scalar input (for each sample point)
+% interpolate (for each sample point)
 for i=1:size(x_vec_pts, 2)
     [y_mat_pts(:,i), idx] = interp_fast(x_vec, y_mat, x_vec_pts(i), idx);
 end
