@@ -168,8 +168,8 @@ function get_disp_timing(name, res)
 
 fprintf('============================ %s\n', name)
 fprintf('\n')
-fprintf('timing / mat / sort = %.2fms / rand = %.2fms\n', 1e3.*res.t_mat_sort, 1e3.*res.t_mat_rand)
-fprintf('timing / mex / sort = %.2fms / rand = %.2fms\n', 1e3.*res.t_mex_sort, 1e3.*res.t_mex_rand)
+fprintf('timing / mat / sort = %.2f ms / rand = %.2f ms\n', 1e3.*res.t_mat_sort, 1e3.*res.t_mat_rand)
+fprintf('timing / mex / sort = %.2f ms / rand = %.2f ms\n', 1e3.*res.t_mex_sort, 1e3.*res.t_mex_rand)
 fprintf('\n')
 
 end

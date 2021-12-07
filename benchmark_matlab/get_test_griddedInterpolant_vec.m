@@ -18,10 +18,7 @@ function y_mat_pts = get_test_griddedInterpolant_vec(x_vec, y_mat, x_vec_pts)
 %    2021 - BSD License.
 
 % check format
-validateattributes(x_vec, {'double'},{'row', 'nonempty', 'nonnan', 'real','finite'});
-validateattributes(y_mat, {'double'},{'2d', 'nonempty', 'nonnan', 'real','finite'});
-validateattributes(x_vec_pts, {'double'},{'row', 'nonempty', 'nonnan', 'real','finite'});
-assert(size(x_vec, 2)==size(y_mat, 2), 'invalid size')
+get_test_check(x_vec, y_mat, x_vec_pts);
 
 % use griddedInterpolant with a vector input
 fct = griddedInterpolant(x_vec.', y_mat.', 'linear', 'linear');

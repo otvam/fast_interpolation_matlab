@@ -11,10 +11,10 @@ function run_example_ode()
 
 % input voltage
 t_vec = linspace(0, 1, 500);
-u_vec = t_vec.*sin(2.*pi.*10.*t_vec);
+u_vec = 1.0+0.5.*sin(2.*pi.*10.*t_vec);
 
 % low-pass time constant and initial value
-tau = 0.03;
+tau = 0.1;
 y_init = 0;
 
 % ode integration tolerance

@@ -13,7 +13,7 @@ x_vec = [0 1 2 3 4 5 6];
 y_mat = [4 5 6 7 8 9 10 ; 2 4 5 2 2 6 8];
 
 % query points
-x_vec_pts = linspace(-2, 8, 101);
+x_vec_pts = linspace(-2, 8, 100);
 
 %% run
 
