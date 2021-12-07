@@ -1,4 +1,4 @@
-function [y_vec_pts, idx] = get_interp_fast(x_vec, y_mat, x_pts, idx_init)
+function [y_vec_pts, idx] = interp_fast(x_vec, y_mat, x_pts, idx_init)
 % Extremely fast linear interpolation method.
 %
 %    Parameters:
@@ -19,6 +19,7 @@ function [y_vec_pts, idx] = get_interp_fast(x_vec, y_mat, x_pts, idx_init)
 %    The following fast interpolation method is implemented:
 %        - After each query, the position (index) of the point is returned.
 %        - This index is used as an initial value for the next query point. 
+%        - If no initial value is available, NaN can be provided. 
 %
 %    This method reduces the computational cost if the query points are partially sorted.
 %    In such cases, the complexity is reduced from O(n) to O(1).
@@ -114,14 +115,10 @@ function y_vec_pts = get_interp_lin(x_vec, y_mat, x_pts, idx)
 %    Returns:
 %        y_vec_pts - interpolated values (float / col vector)
 
-% get the two samples points
-x_1 = x_vec(idx);
-x_2 = x_vec(idx+1);
-y_1 = y_mat(:,idx);
-y_2 = y_mat(:,idx+1);
+% get the slope
+slope = (y_mat(:,idx+1)-y_mat(:,idx))./(x_vec(idx+1)-x_vec(idx));
 
-% linear interpolation between the two points
-slope = (y_2-y_1)./(x_2-x_1);
-y_vec_pts = y_1+slope.*(x_pts-x_1);
+% interpolate
+y_vec_pts = y_mat(:,idx)+slope.*(x_pts-x_vec(idx));
 
 end
