@@ -79,7 +79,7 @@ The following algorithms are compared with sorted and random query points:
 
 The following files are required to run the benchmark:
 * [run_benchmark_compile.m](run_benchmark_compile.m) - Compile the MATLAB files into MEX files.
-* [run_benchmark_run.m](run_benchmark_run.m) - Run the benchmark.
+* [run_benchmark_run.m](run_benchmark_run.m) - Run the benchmark for the different methods.
 
 ### Vectorized Call
 
