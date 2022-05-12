@@ -32,12 +32,15 @@ These methods should be **used in the following case**:
 * The calls cannot be vectorized (interdepency between the query points).
 * A typical use case is ODE integration where the calls cannot be vectorized.
 
-This function can be compiled to a **MEX** file with the **MATLAB Coder**.
+These functions can be compiled to **MEX** files with the **MATLAB Coder**.
 
-## Examples
+## Functions
 
 * [interp_regular.m](interp_regular.m) - Fast interpolation method (evenly spaced sample points).
 * [interp_fast.m](interp_fast.m) - Fast interpolation method (arbitrarily spaced sample points).
+
+## Examples
+
 * [run_example_simple.m](run_example_simple.m) - Minimal working example for the interpolation code.
 * [run_example_ode.m](run_example_ode.m) - Example with interpolation inside an ODE function.
 
